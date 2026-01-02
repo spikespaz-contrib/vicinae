@@ -56,7 +56,7 @@
       devShells = forEachPkgs (pkgs: {
         default = pkgs.mkShell {
           # automatically pulls nativeBuildInputs + buildInputs
-          inputsFrom = [ (pkgs.callPackage ./nix/vicinae.nix { gcc15Stdenv = pkgs.gcc15Stdenv; }) ];
+          inputsFrom = [ pkgs.vicinae ];
           buildInputs = [
             pkgs.ccache
           ];
