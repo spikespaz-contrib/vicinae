@@ -29,6 +29,10 @@
       );
     in
     {
+      lib = {
+        mkVicinaeExtension = system: pkgsFor.${system}.mkVicinaeExtension;
+        mkRayCastExtension = system: pkgsFor.${system}.mkRayCastExtension;
+      };
       packages = lib.mapAttrs (system: pkgs: {
         inherit (pkgs) vicinae;
         default = self.packages.${system}.vicinae;
@@ -52,7 +56,7 @@
       mkVicinaeExtension = lib.mapAttrs (
         _: _:
         lib.warn
-          "vicinae: accessing mkVicinaeExtension from flake top level is deprecated, use packages.<system>.mkVicinaeExtension instaed"
+          "vicinae: accessing mkVicinaeExtension from flake top level is deprecated, use lib.mkVicinaeExtension <system>, or the overlay, instead."
           ({ pkgs, ... }@args: pkgs.callPackage ./nix/mkVicinaeExtension.nix { } args)
       ) pkgsFor;
       devShells = lib.mapAttrs (_: pkgs: {
