@@ -19,17 +19,18 @@
     }:
     let
       inherit (nixpkgs) lib;
-      forEachPkgs = f: lib.genAttrs (import systems) (system:
-        f (import nixpkgs {
+      eachSystem = lib.genAttrs (import systems);
+      pkgsFor = eachSystem (system:
+        import nixpkgs {
           localSystem.system = system;
           overlays = [ self.overlays.default ];
-        })
+        }
       );
     in
     {
-      packages = forEachPkgs (pkgs: {
+      packages = lib.mapAttrs (system: pkgs: {
         inherit (pkgs) vicinae;
-        default = self.packages.${pkgs.system}.vicinae;
+        default = self.packages.${system}.vicinae;
         nix-update-script = pkgs.writeShellScriptBin "nix-update-script" ''
           OLD_API_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.apiDeps.hash)
           OLD_EXT_MAN_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.extensionManagerDeps.hash)
@@ -46,14 +47,13 @@
         '';
         mkVicinaeExtension = pkgs.callPackage ./nix/mkVicinaeExtension.nix { };
         mkRayCastExtension = pkgs.callPackage ./nix/mkRayCastExtension.nix { };
-      });
-      mkVicinaeExtension = forEachPkgs (
-        _:
+      }) pkgsFor;
+      mkVicinaeExtension = lib.mapAttrs (_: _:
         lib.warn
           "vicinae: accessing mkVicinaeExtension from flake top level is deprecated, use packages.<system>.mkVicinaeExtension instaed"
           ({ pkgs, ... }@args: pkgs.callPackage ./nix/mkVicinaeExtension.nix { } args)
-      );
-      devShells = forEachPkgs (pkgs: {
+      ) pkgsFor;
+      devShells = lib.mapAttrs (_: pkgs: {
         default = pkgs.mkShell {
           # automatically pulls nativeBuildInputs + buildInputs
           inputsFrom = [ pkgs.vicinae ];
@@ -66,7 +66,7 @@
             nixfmt-rfc-style
           ];
         };
-      });
+      }) pkgsFor;
       overlays.default = final: prev: {
         vicinae = final.callPackage ./nix/vicinae.nix { };
         mkVicinaeExtension = prev.callPackage ./nix/mkVicinaeExtension.nix { };
