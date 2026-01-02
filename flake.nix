@@ -75,8 +75,7 @@
       }) pkgsFor;
       overlays.default = final: prev: {
         vicinae = final.callPackage ./nix/vicinae.nix { };
-        mkVicinaeExtension = prev.callPackage ./nix/mkVicinaeExtension.nix { };
-        mkRayCastExtension = prev.callPackage ./nix/mkRayCastExtension.nix { };
+        inherit (final.vicinae.passthru) mkVicinaeExtension mkRayCastExtension;
       };
       homeManagerModules.default = import ./nix/module.nix self;
       formatter = eachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);

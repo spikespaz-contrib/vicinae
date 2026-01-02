@@ -1,4 +1,5 @@
 {
+  callPackage,
   abseil-cpp,
   cmake,
   cmark-gfm,
@@ -98,6 +99,11 @@ gcc15Stdenv.mkDerivation (finalAttrs: {
       ]
     }"
   ];
+
+  passthru = {
+    mkVicinaeExtension = callPackage ./mkVicinaeExtension.nix { };
+    mkRayCastExtension = callPackage ./mkRayCastExtension.nix { };
+  };
 
   meta = {
     description = "A focused launcher for your desktop — native, fast, extensible";
