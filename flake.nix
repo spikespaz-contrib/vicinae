@@ -20,7 +20,8 @@
     let
       inherit (nixpkgs) lib;
       eachSystem = lib.genAttrs (import systems);
-      pkgsFor = eachSystem (system:
+      pkgsFor = eachSystem (
+        system:
         import nixpkgs {
           localSystem.system = system;
           overlays = [ self.overlays.default ];
@@ -48,7 +49,8 @@
         mkVicinaeExtension = pkgs.callPackage ./nix/mkVicinaeExtension.nix { };
         mkRayCastExtension = pkgs.callPackage ./nix/mkRayCastExtension.nix { };
       }) pkgsFor;
-      mkVicinaeExtension = lib.mapAttrs (_: _:
+      mkVicinaeExtension = lib.mapAttrs (
+        _: _:
         lib.warn
           "vicinae: accessing mkVicinaeExtension from flake top level is deprecated, use packages.<system>.mkVicinaeExtension instaed"
           ({ pkgs, ... }@args: pkgs.callPackage ./nix/mkVicinaeExtension.nix { } args)
@@ -73,5 +75,6 @@
         mkRayCastExtension = prev.callPackage ./nix/mkRayCastExtension.nix { };
       };
       homeManagerModules.default = import ./nix/module.nix self;
+      formatter = eachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
     };
 }
