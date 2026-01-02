@@ -28,7 +28,8 @@
     in
     {
       packages = forEachPkgs (pkgs: {
-        default = pkgs.vicinae;
+        inherit (pkgs) vicinae;
+        default = self.packages.${pkgs.system}.vicinae;
         nix-update-script = pkgs.writeShellScriptBin "nix-update-script" ''
           OLD_API_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.apiDeps.hash)
           OLD_EXT_MAN_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.extensionManagerDeps.hash)
