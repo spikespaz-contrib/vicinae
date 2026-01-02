@@ -19,11 +19,16 @@
     }:
     let
       inherit (nixpkgs) lib;
-      forEachPkgs = f: lib.genAttrs (import systems) (system: f nixpkgs.legacyPackages.${system});
+      forEachPkgs = f: lib.genAttrs (import systems) (system:
+        f (import nixpkgs {
+          localSystem.system = system;
+          overlays = [ self.overlays.default ];
+        })
+      );
     in
     {
       packages = forEachPkgs (pkgs: {
-        default = pkgs.callPackage ./nix/vicinae.nix { gcc15Stdenv = pkgs.gcc15Stdenv; };
+        default = pkgs.vicinae;
         nix-update-script = pkgs.writeShellScriptBin "nix-update-script" ''
           OLD_API_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.apiDeps.hash)
           OLD_EXT_MAN_DEPS_HASH=$(${pkgs.lib.getExe pkgs.nix} eval --raw .#packages.x86_64-linux.default.extensionManagerDeps.hash)
